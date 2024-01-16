@@ -26,7 +26,6 @@ smt_server <- function(input, output, session){
     login_credentials$df$user <- input$user
 
     if(canConnect(login_credentials$df)){
-      print("connected")
       login_successful(TRUE)
     }else{
       output$login_error <- renderText("Fehlerhafte Login-Daten!")
