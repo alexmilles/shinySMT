@@ -65,7 +65,6 @@ ui <- fluidPage(
           )
       )
     )
-
   ),
   h6("Anmerkungen und Fragen an alexander.milles@wald-rlp.de"),
   h6("Code unter https://github.com/alexmilles/shinySMT"),
