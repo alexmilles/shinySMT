@@ -14,9 +14,9 @@ download_MW_info(
 )
 }
 \arguments{
-\item{Stat}{character, name of the stat}
+\item{Stat}{integer, id of the stat}
 
-\item{Spot}{character, name of the measurement locaiton}
+\item{Spot}{integer, if of the measurement location}
 
 \item{start_date}{posixct, lower range of the time frame}
 

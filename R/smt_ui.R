@@ -21,7 +21,7 @@ ui <- fluidPage(
       conditionalPanel("output.login_successful == 1",
                        dateRangeInput(inputId = "Datum",
                                       label = "Datum",
-                                      start = Sys.time() - 5 * 86500,
+                                      start = Sys.time() - 14 * 86500,
                                       end =Sys.time(),
                                       language = "de",
                                       min = "2023-03-01",
@@ -56,13 +56,28 @@ ui <- fluidPage(
                                                      width = "100%"
                                                      )
                                         )
-                       )
+                       ),
+      width = 2
       ),
     mainPanel = mainPanel(
       conditionalPanel("output.plot_created > 0",
-      shinycssloaders::withSpinner(
-        plotOutput(outputId = "mw_plot")
-        ),
+                       tabsetPanel(
+                         tabPanel(
+                           title = "Messwerte",
+                           shinycssloaders::withSpinner(
+                             plotOutput(outputId = "mw_plot")
+                           )
+                           ),
+                         tabPanel(
+                            title = "Gerätestatus (letztes Signal)",
+                            checkboxInput("include_old",
+                                          label = "Signale älter als 14 Tage anzeigen (langsamer)?",
+                                          value = TRUE),
+                            shinycssloaders::withSpinner(
+                              plotOutput(outputId = "health_plot", height = "1200px")
+                              )
+                            )
+                         ),
         downloadButton(
           outputId = "download_local",
           label = "Messdaten herunterladen"

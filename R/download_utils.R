@@ -48,7 +48,7 @@ full_download <- function(table_name = "Tab_Stat", login_credentials){
 #' @title download LI datatable with filter
 #' connects to database to download LI table with filter and disconnects after finishing or error
 
-#' @param Stat character, name of the stat
+#' @param Stat integer, id of the stat
 #' @param login_credentials data.frame, contains login information
 download_LI <- function(Stat, login_credentials){
   con <- connect(login_credentials = login_credentials)
@@ -66,8 +66,8 @@ download_LI <- function(Stat, login_credentials){
 #' @title download information on which Spots, Paramaters, Messpositions exist for a given Stat and time frame
 #' connects to database to get information and disconnects after finishing or error
 
-#' @param Stat character, name of the stat
-#' @param Spot character, name of the measurement locaiton
+#' @param Stat integer, id of the stat
+#' @param Spot integer, if of the measurement location
 #' @param start_date posixct, lower range of the time frame
 #' @param end_date posixct, upper range of the time frame
 #' @param login_credentials data.frame, contains login information
@@ -78,7 +78,7 @@ download_MW_info <- function(Stat, Spot = -999, start_date = Sys.time() - 7 * 86
 
   on.exit(DBI::dbDisconnect(con))
 
-  download_table <-
+  mw_info <-
     dplyr::tbl(con, "Tab_MW") |>
     dplyr::filter(ID_Stat == Stat) |>
     dplyr::filter(Datum > dbplyr::sql_escape_datetime(con, start_date)) |>
@@ -87,19 +87,19 @@ download_MW_info <- function(Stat, Spot = -999, start_date = Sys.time() - 7 * 86
     dplyr::distinct() |>
     dplyr::collect()
 
-  return(download_table)
+  return(mw_info)
 }
 
 #' @title download information on which Spots, Paramaters, Messpositions exist for a given Stat and time frame
 #' connects to database  to get information and disconnects after finishing or error
 
-#' @param Stat character, name of the stat
-#' @param Spot character, name of the measurement locaiton
-#' @param Para character, name of the measurement parameter
-#' @param Messposition numeric, vertical location of measurement, can be above or below ground
+#' @param Stat integer, id of the stat
+#' @param Spot integer, if of the measurement location
+#' @param Para integer, id of the parameter
+#' @param Messposition integer, id of vertical location of measurement, can be above or below ground
 #' @param start_date posixct, lower range of the time frame
 #' @param end_date posixct, upper range of the time frame
-#' @param Quali, integer, value of dataqualitaet (1 = raw data)
+#' @param Quali, integer, id value of dataqualitaet (1 = raw data)
 #' @param login_credentials data.frame, contains login information
 #'
 #' @export
@@ -137,6 +137,40 @@ download_static_tables <- function(login_credentials){
   }
 
   return(tbl_list)
+}
+
+download_last_signal <- function(Stat,
+                                 include_old = FALSE,
+                                 login_credentials,
+                                 start_date =Sys.time() - 14 * 86500){
+  con <- connect(login_credentials = login_credentials)
+
+  on.exit(DBI::dbDisconnect(con))
+
+
+  last_signal <-
+    dplyr::tbl(con, "Tab_MW") |>
+    dplyr::filter(Datum > start_date) |>
+    dplyr::filter(ID_Stat == Stat) |>
+    dplyr::group_by(ID_Para, ID_Spot, ID_Messposition, ID_Wdh) |>
+    dplyr::summarise(Datum = max(Datum)) |>
+    dplyr::collect()
+
+  if(include_old){
+    all_measurements <- dplyr::tbl(con, "Tab_MW") |>
+      dplyr::filter(ID_Stat == Stat) |>
+      dplyr::select(ID_Para, ID_Spot, ID_Messposition, ID_Wdh) |>
+      dplyr::distinct() |>
+      dplyr::collect()
+
+    last_signal <-
+      all_measurements |>
+      dplyr::left_join(last_signal) |>
+      dplyr::mutate(Datum = ifelse(is.na(Datum), (start_date - 86400), Datum)) |>
+      dplyr::mutate(Datum = as.POSIXct(Datum))
+  }
+
+  return(last_signal)
 }
 
 

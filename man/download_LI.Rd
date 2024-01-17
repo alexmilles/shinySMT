@@ -8,7 +8,7 @@ connects to database to download LI table with filter and disconnects after fini
 download_LI(Stat, login_credentials)
 }
 \arguments{
-\item{Stat}{character, name of the stat}
+\item{Stat}{integer, id of the stat}
 
 \item{login_credentials}{data.frame, contains login information}
 }

@@ -17,19 +17,19 @@ download_MW(
 )
 }
 \arguments{
-\item{Stat}{character, name of the stat}
+\item{Stat}{integer, id of the stat}
 
-\item{Spot}{character, name of the measurement locaiton}
+\item{Spot}{integer, if of the measurement location}
 
-\item{Para}{character, name of the measurement parameter}
+\item{Para}{integer, id of the parameter}
 
-\item{Messposition}{numeric, vertical location of measurement, can be above or below ground}
+\item{Messposition}{integer, id of vertical location of measurement, can be above or below ground}
 
 \item{start_date}{posixct, lower range of the time frame}
 
 \item{end_date}{posixct, upper range of the time frame}
 
-\item{Quali, }{integer, value of dataqualitaet (1 = raw data)}
+\item{Quali, }{integer, id value of dataqualitaet (1 = raw data)}
 
 \item{login_credentials}{data.frame, contains login information}
 }

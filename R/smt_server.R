@@ -71,6 +71,13 @@ smt_server <- function(input, output, session){
     }
   })
 
+  last_signal <- reactive({
+    if(login_successful()){
+      download_last_signal(Stat = input$Stat,
+                           login_credentials = login_credentials$df,
+                           include_old = input$include_old)
+    }
+  })
 
   # UPDATE SELECTION
   observe({
@@ -139,36 +146,28 @@ smt_server <- function(input, output, session){
 
   # VISUALIZE SELECTION
   mw_plot <- reactive({
-    mw() |>
-      dplyr::mutate(Messposition = paste("Messposition:", Messposition, "cm")) |>
-      ggplot2::ggplot(
-        ggplot2::aes(
-          x = Datum,
-          y = Messwert,
-          group = as.factor(paste0(ID_Spot, "_", ID_Wdh)),
-          color = as.factor(paste0(ID_Spot)),
-          shape = as.factor(ID_Wdh)
-          )
-        )+
-      ggplot2::geom_point()+
-      ggplot2::geom_line()+
-      ggplot2::theme_bw()+
-      ggplot2::theme(text = ggplot2::element_text(size = 16))+
-      ggplot2::scale_shape("Wiederholung")+
-      ggplot2::scale_color_viridis_d("Spot")+
-      ggplot2::facet_wrap(~Messposition, ncol = 1)+
-      ggplot2::labs(x = "Datum",
-                    y = paste(stringr::str_trim(mw_info()$Parameter[1]),
-                              mw_info()$Einheit[1]))+
-      ggplot2::guides(
-        color = ifelse(length(input$Spot) == 1, "none", "legend"),
-        shape = ifelse(length(unique(mw_info()$ID_Wdh)) == 1, "none", "legend")
-        )
+    plot_mw(
+      mw = mw(),
+      mw_info = mw_info(),
+      input = input
+      )
+  }) |>
+    bindEvent(mw())
+
+  health_plot <- reactive({
+    plot_health(
+      last_signal = last_signal(),
+      stbls = stbls()
+    )
   }) |>
     bindEvent(mw())
 
   output$mw_plot <- renderPlot({
     mw_plot()
+  })
+
+  output$health_plot <- renderPlot({
+    health_plot()
   })
 
   # check if data has been downloaded already (see conditional panel)
