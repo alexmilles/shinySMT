@@ -131,6 +131,7 @@ smt_server <- function(input, output, session){
                   Messposition = input$Messposition,
                   start_date = input$Datum[1],
                   end_date = input$Datum[2],
+                  Quali = ifelse(input$Quali, 1,-999),
                   login_credentials = login_credentials$df) |>
         dplyr::left_join(stbls()$Tab_Messposition)
   }) |>
@@ -143,19 +144,25 @@ smt_server <- function(input, output, session){
         ggplot2::aes(
           x = Datum,
           y = Messwert,
-          group = as.factor(ID_Spot),
-          color = as.factor(ID_Spot)
+          group = as.factor(paste0(ID_Spot, "_", ID_Wdh)),
+          color = as.factor(paste0(ID_Spot)),
+          shape = as.factor(ID_Wdh)
           )
         )+
       ggplot2::geom_point()+
       ggplot2::geom_line()+
       ggplot2::theme_bw()+
       ggplot2::theme(text = ggplot2::element_text(size = 16))+
+      ggplot2::scale_shape("Wiederholung")+
       ggplot2::scale_color_viridis_d("Spot")+
       ggplot2::facet_wrap(~Messposition, ncol = 1)+
       ggplot2::labs(x = "Datum",
                     y = paste(stringr::str_trim(mw_info()$Parameter[1]),
-                              mw_info()$Einheit[1]))
+                              mw_info()$Einheit[1]))+
+      ggplot2::guides(
+        color = ifelse(length(input$Spot) == 1, "none", "legend"),
+        shape = ifelse(length(unique(mw_info()$ID_Wdh)) == 1, "none", "legend")
+        )
   }) |>
     bindEvent(mw())
 
@@ -173,7 +180,8 @@ smt_server <- function(input, output, session){
            stringr::str_trim(mw_info()$Parameter[1]), "_",
            input$Datum[1], "to", input$Datum[2],
            "Spot", paste(input$Spot, collapse = "_"), "_",
-           "Messposition", paste(input$Messposition, collapse = "_"))
+           "Messposition", paste(input$Messposition, collapse = "_"), "_",
+           ifelse(input$Quali, "DatenqualitaetRohdaten", "DatenqualitaetAlle"))
   })
 
   #handle download to local download folder

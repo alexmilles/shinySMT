@@ -35,6 +35,9 @@ ui <- fluidPage(
                                    label = "Messparameter",
                                    choices = NULL,
                                    multiple = FALSE),
+                       checkboxInput(inputId = "Quali",
+                                     label = "Nur Rohdaten",
+                                     value = TRUE),
                        conditionalPanel("output.length_spot > 1",
                                         selectInput(
                                           inputId = "Spot",
