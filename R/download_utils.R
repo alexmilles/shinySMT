@@ -1,5 +1,5 @@
 
-#' Connects to database via data.frame
+#' @title Connects to database via data.frame
 #' Wrapper for frwfutils::db_connect
 #'
 #' @param login_credentials data.frame, contains login information
@@ -12,7 +12,7 @@ connect <- function(login_credentials){
     local = login_credentials$local)
 }
 
-#' Checks whether login information is valid
+#' @title Checks whether login information is valid
 #' Wrapper for frwfutils::dbCanConnect
 #'
 #' @param login_credentials data.frame, contains login information
@@ -25,8 +25,8 @@ canConnect <- function(login_credentials){
     local = login_credentials$local)
 }
 
-# download datatable
-# connects to database to download all content of a table and disconnects after finishing or error
+#' @title download datatable
+#' connects to database to download all content of a table and disconnects after finishing or error
 
 #' @param table_name character, name of the database table
 #' @param login_credentials data.frame, contains login information
@@ -45,8 +45,8 @@ full_download <- function(table_name = "Tab_Stat", login_credentials){
 }
 
 
-# download LI datatable with filter
-# connects to database to download LI table with filter and disconnects after finishing or error
+#' @title download LI datatable with filter
+#' connects to database to download LI table with filter and disconnects after finishing or error
 
 #' @param Stat character, name of the stat
 #' @param login_credentials data.frame, contains login information
@@ -63,8 +63,8 @@ download_LI <- function(Stat, login_credentials){
   return(download_table)
 }
 
-# download information on which Spots, Paramaters, Messpositions exist for a given Stat and time frame
-# connects to database to get information and disconnects after finishing or error
+#' @title download information on which Spots, Paramaters, Messpositions exist for a given Stat and time frame
+#' connects to database to get information and disconnects after finishing or error
 
 #' @param Stat character, name of the stat
 #' @param Spot character, name of the measurement locaiton
@@ -90,8 +90,8 @@ download_MW_info <- function(Stat, Spot = -999, start_date = Sys.time() - 7 * 86
   return(download_table)
 }
 
-# download information on which Spots, Paramaters, Messpositions exist for a given Stat and time frame
-# connects to database  to get information and disconnects after finishing or error
+#' @title download information on which Spots, Paramaters, Messpositions exist for a given Stat and time frame
+#' connects to database  to get information and disconnects after finishing or error
 
 #' @param Stat character, name of the stat
 #' @param Spot character, name of the measurement locaiton
@@ -121,8 +121,8 @@ download_MW <- function(Stat, Spot = -999, Para = -999, Messposition = -999, sta
   return(download_table)
 }
 
-# download tables that contain static information
-# connects to databaseto get informationr and disconnects after finishing or error
+#' @title download tables that contain static information
+#' connects to databaseto get informationr and disconnects after finishing or error
 
 #' @param login_credentials data.frame, contains login information
 #'
