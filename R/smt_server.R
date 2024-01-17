@@ -140,6 +140,7 @@ smt_server <- function(input, output, session){
   # VISUALIZE SELECTION
   mw_plot <- reactive({
     mw() |>
+      dplyr::mutate(Messposition = paste("Messposition:", Messposition, "cm")) |>
       ggplot2::ggplot(
         ggplot2::aes(
           x = Datum,
