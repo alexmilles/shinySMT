@@ -51,8 +51,8 @@ ui <- fluidPage(
                                                     multiple = TRUE)),
                        conditionalPanel("output.mw_info_true > 0",
                                         actionButton(inputId = "download_mw",
-                                                     label = "Messdaten aus Datenbank abrufen",
-                                                     icon = icon("download"),
+                                                     label = "Datenbankabfrage",
+                                                     icon = icon("database"),
                                                      width = "100%"
                                                      )
                                         )
