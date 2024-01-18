@@ -24,7 +24,6 @@ ui <- fluidPage(
                                       start = Sys.time() - 14 * 86500,
                                       end =Sys.time(),
                                       language = "de",
-                                      min = "2023-03-01",
                                       max =Sys.time()
                                       ),
                        selectInput(inputId = "Stat",
@@ -91,7 +90,7 @@ ui <- fluidPage(
                            )
                            ),
                          tabPanel(
-                            title = "Gerätestatus (letztes Signal)",
+                            title = "Gerätestatus (Tage seit letzter Übertragung)",
                             checkboxInput("include_old",
                                           label = "Signale älter als 14 Tage anzeigen (langsamer)?",
                                           value = TRUE),

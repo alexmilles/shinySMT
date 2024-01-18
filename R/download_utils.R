@@ -142,7 +142,11 @@ download_MW <- function(Stat,
   return(mw)
 }
 
-
+#' Function aggregate mw data with a given temporal resolution and function
+#'
+#' @param mw dbplyr database connection tbl
+#' @param agg_fun character, name of the aggregation function - may either be "mean", "min", "max" or "none"
+#' @param agg_time numeric, temporal resolution of the aggregation
 apply_agg_fun <- function(mw, agg_fun, agg_time){
   {if(agg_fun != "none"){
     mw |>
