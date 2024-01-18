@@ -1,6 +1,13 @@
-plot_mw <- function(mw, mw_info, input){
+plot_mw <- function(mw, mw_info, input, agg_name){
+
   mw |>
-    dplyr::mutate(Messposition = paste("Messposition:", Messposition, "cm")) |>
+    dplyr::arrange(ID_Messposition) |>
+    dplyr::mutate(Messposition = factor(ID_Messposition,
+                                        labels = paste("Messposition:",
+                                                       unique(Messposition),
+                                                       "cm")
+                                        )
+                  ) |>
     ggplot2::ggplot(
       ggplot2::aes(
         x = Datum,
@@ -19,13 +26,15 @@ plot_mw <- function(mw, mw_info, input){
     ggplot2::facet_wrap(~Messposition, ncol = 1)+
     ggplot2::labs(x = "Datum",
                   y = paste(stringr::str_trim(mw_info$Parameter[1]),
-                            mw_info$Einheit[1]))+
+                            stringr::str_trim(mw_info$Einheit[1]),
+                            agg_name))+
     ggplot2::guides(
       color = ifelse(length(input$Spot) == 1, "none", "legend"),
       shape = ifelse(length(unique(mw_info$ID_Wdh)) == 1, "none", "legend")
     )+
     ggplot2::scale_x_datetime(limits = as.POSIXct(input$Datum))
 }
+
 
 plot_health <- function(last_signal, stbls){
 

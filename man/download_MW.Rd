@@ -13,7 +13,9 @@ download_MW(
   start_date = Sys.time() - 7 * 86400,
   end_date = Sys.time(),
   Quali = -999,
-  login_credentials
+  login_credentials,
+  agg_fun = "none",
+  agg_time = NULL
 )
 }
 \arguments{
@@ -32,6 +34,10 @@ download_MW(
 \item{Quali, }{integer, id value of dataqualitaet (1 = raw data)}
 
 \item{login_credentials}{data.frame, contains login information}
+
+\item{agg_fun}{character, function used for aggregation, "none" if no aggregation is to be applied}
+
+\item{agg_time}{numeric, temporal resolution of aggregation}
 }
 \description{
 download information on which Spots, Paramaters, Messpositions exist for a given Stat and time frame

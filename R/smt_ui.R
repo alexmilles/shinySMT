@@ -35,10 +35,7 @@ ui <- fluidPage(
                                    label = "Messparameter",
                                    choices = NULL,
                                    multiple = FALSE),
-                       checkboxInput(inputId = "Quali",
-                                     label = "Nur Rohdaten",
-                                     value = TRUE),
-                       conditionalPanel("output.length_spot > 1",
+                        conditionalPanel("output.length_spot > 1",
                                         selectInput(
                                           inputId = "Spot",
                                           label = "Messspot",
@@ -49,6 +46,30 @@ ui <- fluidPage(
                                                     label =  "Messposition",
                                                     choices = NULL,
                                                     multiple = TRUE)),
+                       shinyWidgets::dropdownButton(
+                         inputId = "showAdvancedOptions",
+                         label = "Erweitere Optionen",
+                         icon = icon("sliders"),
+                         circle = FALSE,
+                         checkboxInput(inputId = "Quali",
+                                       label = "Nur Rohdaten",
+                                       value = TRUE),
+                         selectInput(inputId = "agg_fun",
+                                     label = "Aggregierung",
+                                     choices = c("none", "mean", "min", "max") |>
+                                       setNames(c("Keine Aggregierung",
+                                                  "Mittelwert",
+                                                  "Minimum",
+                                                  "Maximum")),
+                                     selected = "none"),
+                         conditionalPanel("input.agg_fun != 'none'",
+                                          numericInput(inputId = "agg_time",
+                                                       label = "Zeitliche Auflösung (Tage)",
+                                                       value = 1,
+                                                       min = 1,
+                                                       max = 365)
+                         )
+                       ),
                        conditionalPanel("output.mw_info_true > 0",
                                         actionButton(inputId = "download_mw",
                                                      label = "Datenbankabfrage",
@@ -65,7 +86,8 @@ ui <- fluidPage(
                          tabPanel(
                            title = "Messwerte",
                            shinycssloaders::withSpinner(
-                             plotOutput(outputId = "mw_plot")
+                             plotOutput(outputId = "mw_plot",
+                                        height = "700px")
                            )
                            ),
                          tabPanel(

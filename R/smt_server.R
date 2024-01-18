@@ -71,6 +71,7 @@ smt_server <- function(input, output, session){
     }
   })
 
+  # GET TIME OF LAST SIGNAL RECEIVED FROM EACH MEASUREMENT UNIT
   last_signal <- reactive({
     if(login_successful()){
       download_last_signal(Stat = input$Stat,
@@ -139,7 +140,9 @@ smt_server <- function(input, output, session){
                   start_date = input$Datum[1],
                   end_date = input$Datum[2],
                   Quali = ifelse(input$Quali, 1,-999),
-                  login_credentials = login_credentials$df) |>
+                  login_credentials = login_credentials$df,
+                  agg_fun = input$agg_fun,
+                  agg_time = input$agg_time) |>
         dplyr::left_join(stbls()$Tab_Messposition)
   }) |>
     bindEvent(input$download_mw)
@@ -149,7 +152,8 @@ smt_server <- function(input, output, session){
     plot_mw(
       mw = mw(),
       mw_info = mw_info(),
-      input = input
+      input = input,
+      agg_name = agg_name()
       )
   }) |>
     bindEvent(mw())
@@ -175,13 +179,29 @@ smt_server <- function(input, output, session){
   outputOptions(output, "plot_created", suspendWhenHidden = FALSE)
 
   # create detailed filename for download
+  agg_name <- reactive({
+    if(input$agg_fun == "none"){
+      ""
+    }else{
+      paste0(input$agg_time,
+            "-tägiger ",
+      switch(input$agg_fun,
+             mean = "Mittelwert",
+             min = "Minimalwert",
+             max = "Maximalwert"
+             )
+      )
+    }
+  })
+
   dlname <- reactive({
     paste0("Stat", input$Stat, "_",
            stringr::str_trim(mw_info()$Parameter[1]), "_",
            input$Datum[1], "to", input$Datum[2],
            "Spot", paste(input$Spot, collapse = "_"), "_",
-           "Messposition", paste(input$Messposition, collapse = "_"), "_",
-           ifelse(input$Quali, "DatenqualitaetRohdaten", "DatenqualitaetAlle"))
+           "Messpos", paste(input$Messposition, collapse = "_"), "_",
+           agg_name(),
+           ifelse(input$Quali, "DatQualiRohdaten", "DatQualiAlle"))
   })
 
   #handle download to local download folder
@@ -196,11 +216,12 @@ smt_server <- function(input, output, session){
       #remove previous files
       file.remove(list.files(pattern = "Messposition"))
 
+
       #save plot
       ggplot2::ggsave(filename = paste0(dlname(), ".png"),
                       plot = mw_plot(),
-                      width = 7,
-                      height = 4*length(unique(mw()$Messposition)))
+                      width = 10,
+                      height = 7*length(unique(mw()$Messposition)))
 
       #write datatable
       readr::write_csv2(mw(), paste0(dlname(), ".csv"))

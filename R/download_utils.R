@@ -101,14 +101,26 @@ download_MW_info <- function(Stat, Spot = -999, start_date = Sys.time() - 7 * 86
 #' @param end_date posixct, upper range of the time frame
 #' @param Quali, integer, id value of dataqualitaet (1 = raw data)
 #' @param login_credentials data.frame, contains login information
+#' @param agg_fun character, function used for aggregation, "none" if no aggregation is to be applied
+#' @param agg_time numeric, temporal resolution of aggregation
 #'
 #' @export
-download_MW <- function(Stat, Spot = -999, Para = -999, Messposition = -999, start_date = Sys.time() - 7 * 86400, end_date = Sys.time(), Quali = -999, login_credentials){
+download_MW <- function(Stat,
+                        Spot = -999,
+                        Para = -999,
+                        Messposition = -999,
+                        start_date = Sys.time() - 7 * 86400,
+                        end_date = Sys.time(),
+                        Quali = -999,
+                        login_credentials,
+                        agg_fun = "none",
+                        agg_time = NULL){
+  #login_credentials <- data.frame(server = "klikomz", database = "Testdatenbank_Mike", user = "fawfuser", pwd = "odbc", local = FALSE)
   con <- connect(login_credentials = login_credentials)
 
   on.exit(DBI::dbDisconnect(con))
 
-  download_table <-
+  mw <-
     dplyr::tbl(con, "Tab_MW") |>
     dplyr::filter(ID_Stat == Stat) |>
     dplyr::filter(Datum > dbplyr::sql_escape_datetime(con, start_date)) |>
@@ -117,8 +129,45 @@ download_MW <- function(Stat, Spot = -999, Para = -999, Messposition = -999, sta
     dplyr::filter(ID_Quali %in% Quali | -999 %in% Quali) |>
     dplyr::filter(ID_Para == Para| Para == -999) |>
     dplyr::filter(ID_Messposition %in% Messposition | -999 %in% Messposition) |>
-    dplyr::collect()
-  return(download_table)
+    apply_agg_fun(agg_fun = agg_fun, agg_time = agg_time) |>
+    dplyr::collect() |>
+    dplyr::mutate(Datum = ifelse(rep(is.numeric(Datum), dplyr::n()),
+                                 as.POSIXct(Datum * agg_time * 86400, origin = "1900-01-01"),
+                                 as.POSIXct(Datum))) |>
+    dplyr::mutate(Datum = as.POSIXct(Datum,
+                                     origin = "1970-01-01"))  |>
+    dplyr::relocate(Messwert, .before = ID_Quali) |>
+    dplyr::ungroup()
+
+  return(mw)
+}
+
+
+apply_agg_fun <- function(mw, agg_fun, agg_time){
+  {if(agg_fun != "none"){
+    mw |>
+      dplyr::select(dplyr::everything()) |>
+    dplyr::group_by(ID_Stat,
+                    ID_Spot,
+                    ID_Para,
+                    ID_Messposition,
+                    ID_Messverfahren,
+                    ID_Wdh,
+                    Baumnr,
+                    ID_Orientierung,
+                    ID_BA,
+                    ID_Alter,
+                    Datum = floor(as.numeric(Datum) / agg_time),
+                    ID_Quali) |>
+      dplyr::summarise(Messwert = switch(agg_fun,
+                                         mean = mean(Messwert),
+                                         min = min(Messwert),
+                                         max = max(Messwert)
+      )
+      )
+  }else{
+    mw
+  }}
 }
 
 #' @title download tables that contain static information
@@ -173,4 +222,18 @@ download_last_signal <- function(Stat,
   return(last_signal)
 }
 
+# coordinate data currently insufficient
+# download_coords <- function(){
+#   # login_credentials = data.frame(server = "klikomz", database = "Testdatenbank_Mike", user = "fawfuser", pwd = "odbc", local = FALSE)
+#   # con <- connect(login_credentials = login_credentials)
+#   # on.exit(DBI::dbDisconnect(con))
+#   #
+#   # odbc::dbListTables(con) |>
+#   #   as.data.frame() |>
+#   #   setNames("names") |>
+#   #   dplyr::filter(stringr::str_detect(names, "Tab"))
+#   #
+#   # full_download("Tab_SL", login_credentials)
+#
+# }
 
