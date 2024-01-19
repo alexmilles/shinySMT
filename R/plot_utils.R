@@ -1,3 +1,12 @@
+#' plot time series of measurements
+
+#' @param mw data.frame, download result by download_mw
+#' @param input list, shiny input
+#' @param agg_name, character, name of the current aggregation to adjust y-axis label
+#'
+#' @returns ggplot2 object
+#' @export
+#'
 plot_mw <- function(mw, mw_info, input, agg_name){
 
   mw |>
@@ -35,7 +44,14 @@ plot_mw <- function(mw, mw_info, input, agg_name){
     ggplot2::scale_x_datetime(limits = as.POSIXct(input$Datum))
 }
 
+#' plot time passed since last measurement for all devices
 
+#' @param last_signal data.frame, download result by download_last_signal
+#' @param stbls list, download result by download_static_tables
+#'
+#' @returns ggplot2 object
+#' @export
+#'
 plot_health <- function(last_signal, stbls){
 
   color.df <- data.frame(
@@ -76,6 +92,13 @@ plot_health <- function(last_signal, stbls){
 }
 
 
+#' plot value of the last measurement for all active devices
+#'
+#' @param last_signal data.frame, download result by download_last_signal
+#' @param stbls list, download result by download_static_tables
+#'
+#' @returns ggiraph object
+#' @export
 plot_last_value <- function(last_signal, stbls){
   (last_signal |>
     dplyr::left_join(stbls$Tab_Para) |>

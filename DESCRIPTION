@@ -20,7 +20,11 @@ Imports:
     dplyr,
     frwfutils,
     ggh4x,
+    ggiraph,
     ggplot2,
+    lubridate,
     readr,
     shinycssloaders,
-    shinythemes
+    shinythemes,
+    shinyWidgets,
+    stringr

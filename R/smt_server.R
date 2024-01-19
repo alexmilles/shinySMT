@@ -9,12 +9,12 @@ smt_server <- function(input, output, session){
     deleteFile = FALSE)
 
   # define login credentials
-  login_credentials <- reactiveValues(df = data.frame(
-    server = "klikomz",
-    database = "Testdatenbank_Mike",
-    user = NA,
-    pwd = NA,
-    local = FALSE
+  login_credentials <- reactiveValues(
+    df = data.frame(
+      server = "klikomz",
+      database = "Testdatenbank_Mike",
+      pwd = NA,
+      local = FALSE
   ))
 
   # handle user provided login information
@@ -147,7 +147,25 @@ smt_server <- function(input, output, session){
   }) |>
     bindEvent(input$download_mw)
 
-  # VISUALIZE SELECTION
+  ##### VISUALIZE SELECTION  #####
+
+  # create name of aggregation (if applicable) for labelling and data download
+  agg_name <- reactive({
+    if(input$agg_fun == "none"){
+      ""
+    }else{
+      paste0(input$agg_time,
+             "-tägiger ",
+             switch(input$agg_fun,
+                    mean = "Mittelwert",
+                    min = "Minimalwert",
+                    max = "Maximalwert"
+             )
+      )
+    }
+  })
+
+  # time series plot
   mw_plot <- reactive({
     plot_mw(
       mw = mw(),
@@ -158,6 +176,11 @@ smt_server <- function(input, output, session){
   }) |>
     bindEvent(mw())
 
+  output$mw_plot <- renderPlot({
+    mw_plot()
+  })
+
+  # time since last signal has been received
   health_plot <- reactive({
     plot_health(
       last_signal = last_signal(),
@@ -165,6 +188,12 @@ smt_server <- function(input, output, session){
     )
   }) |>
     bindEvent(mw())
+
+  output$health_plot <- renderPlot({
+    health_plot()
+  })
+  # last measurement that has been received
+
 
   last_value_plot <- reactive({
     plot_last_value(
@@ -174,38 +203,16 @@ smt_server <- function(input, output, session){
   }) |>
     bindEvent(mw())
 
-  output$mw_plot <- renderPlot({
-    mw_plot()
-  })
-
-  output$health_plot <- renderPlot({
-    health_plot()
-  })
-
   output$last_value_plot <- ggiraph::renderGirafe({
     last_value_plot()
   })
+
 
   # check if data has been downloaded already (see conditional panel)
   output$plot_created <- reactive({as.numeric(isTruthy(mw()))})
   outputOptions(output, "plot_created", suspendWhenHidden = FALSE)
 
   # create detailed filename for download
-  agg_name <- reactive({
-    if(input$agg_fun == "none"){
-      ""
-    }else{
-      paste0(input$agg_time,
-            "-tägiger ",
-      switch(input$agg_fun,
-             mean = "Mittelwert",
-             min = "Minimalwert",
-             max = "Maximalwert"
-             )
-      )
-    }
-  })
-
   dlname <- reactive({
     paste0("Stat", input$Stat, "_",
            stringr::str_trim(mw_info()$Parameter[1]), "_",

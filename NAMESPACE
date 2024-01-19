@@ -3,4 +3,7 @@
 export(download_MW)
 export(download_MW_info)
 export(download_static_tables)
+export(plot_health)
+export(plot_last_value)
+export(plot_mw)
 export(smt_app)
