@@ -55,10 +55,11 @@ plot_health <- function(last_signal, stbls){
     dplyr::left_join(color.df) |>
     dplyr::left_join(stbls$Tab_Para) |>
     dplyr::left_join(stbls$Tab_Messposition) |>
+    dplyr::mutate(Messposition = ifelse(is.na(Messposition), 0, Messposition)) |>
     dplyr::mutate(Spot = paste0("Spot: ", ID_Spot)) |>
     dplyr::mutate(Para = paste(stringr::str_trim(Parameter), stringr::str_trim(Einheit))) |>
-  ggplot2::ggplot(ggplot2::aes(y = as.factor(ID_Wdh),
-                               x = as.factor(Messposition),
+  ggplot2::ggplot(ggplot2::aes(x = as.factor(ID_Wdh),
+                               y = as.factor(Messposition),
                                fill = fills,
                                color = colors,
                                label = ifelse(last_signal > 14, "> 14", signif(last_signal, 2))))+
@@ -72,4 +73,43 @@ plot_health <- function(last_signal, stbls){
     ggplot2::facet_wrap(Spot~Para, scales = "free")+
     ggplot2::theme_classic()+
     ggplot2::theme(text = ggplot2::element_text(size = 14))
+}
+
+
+plot_last_value <- function(last_signal, stbls){
+  (last_signal |>
+    dplyr::left_join(stbls$Tab_Para) |>
+    dplyr::left_join(stbls$Tab_Messposition) |>
+    dplyr::group_by(Parameter) |>
+    dplyr::mutate(Messposition = ifelse(is.na(Messposition), 0, Messposition)) |>
+    dplyr::mutate(fill_value = rank(Messwert)/dplyr::n()) |>
+    dplyr::mutate(Spot = paste0("Spot: ", ID_Spot)) |>
+    dplyr::mutate(Para = paste(stringr::str_trim(Parameter), stringr::str_trim(Einheit))) |>
+    ggplot2::ggplot(ggplot2::aes(x = as.factor(ID_Wdh),
+                                 y = as.factor(Messposition),
+                                 fill = fill_value,
+                                 label = signif(Messwert,3)))+
+    ggplot2::labs(y = "Messposition [cm]",
+                  x = "Wiederholung",
+                  title = "Aktuelle Messwerte",
+                  caption = "Aktuelle Messwerte der ausgewählten Station nach Spot, Wiederholung sowie Parameter gruppiert.\n Weitere mögliche Gruppierungen wie Einzelbäume + Orientierung werden aktuell nicht einzeln dargestellt.")+
+    ggplot2::scale_fill_viridis_c(
+      "Relative Farbskala",
+      breaks = c(.9, 0.5, 0.1),
+      labels = c("hoch", "mittel", "niedrig"),
+      option = "E",
+      end = .9)+
+    ggiraph::geom_tile_interactive(color = "gray99",
+                                   ggplot2::aes(
+                                     tooltip = paste(stringr::str_trim(Parameter), "\n",
+                                                     signif(Messwert,3), stringr::str_trim(Einheit), "\n",
+                                                      Datum)))+
+    ggplot2::geom_text(color = "white")+
+    ggh4x::facet_grid2(Para~Spot, scales = "free", independent = "all")+
+    ggplot2::theme_minimal()+
+    ggplot2::theme(text = ggplot2::element_text(size = 24),
+                   legend.position = "top",
+                   strip.text.y = ggplot2::element_text(angle = 0))) |>
+    ggiraph::girafe(code = NULL, width_svg = 18, height_svg = 18, pointsize = 20)
+
 }

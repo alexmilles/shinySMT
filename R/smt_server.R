@@ -166,12 +166,24 @@ smt_server <- function(input, output, session){
   }) |>
     bindEvent(mw())
 
+  last_value_plot <- reactive({
+    plot_last_value(
+      last_signal = last_signal(),
+      stbls = stbls()
+    )
+  }) |>
+    bindEvent(mw())
+
   output$mw_plot <- renderPlot({
     mw_plot()
   })
 
   output$health_plot <- renderPlot({
     health_plot()
+  })
+
+  output$last_value_plot <- ggiraph::renderGirafe({
+    last_value_plot()
   })
 
   # check if data has been downloaded already (see conditional panel)

@@ -200,14 +200,14 @@ download_last_signal <- function(Stat,
 
   on.exit(DBI::dbDisconnect(con))
 
-
-  last_signal <-
+    last_signal <-
     dplyr::tbl(con, "Tab_MW") |>
     dplyr::filter(Datum > start_date) |>
     dplyr::filter(ID_Stat == Stat) |>
     dplyr::group_by(ID_Para, ID_Spot, ID_Messposition, ID_Wdh) |>
-    dplyr::summarise(Datum = max(Datum)) |>
-    dplyr::collect()
+    dplyr::filter(Datum == max(Datum)) |>
+    dplyr::collect() |>
+    dplyr::filter(seq(dplyr::n()) == 1)
 
   if(include_old){
     all_measurements <- dplyr::tbl(con, "Tab_MW") |>

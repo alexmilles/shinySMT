@@ -19,6 +19,7 @@ Imports:
     DBI,
     dplyr,
     frwfutils,
+    ggh4x,
     ggplot2,
     readr,
     shinycssloaders,
