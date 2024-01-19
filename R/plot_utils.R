@@ -79,6 +79,10 @@ plot_health <- function(last_signal, stbls){
 plot_last_value <- function(last_signal, stbls){
   (last_signal |>
     dplyr::left_join(stbls$Tab_Para) |>
+    dplyr::filter(!is.na(Messwert)) |>
+    dplyr::group_by(Parameter, ID_Spot) |>
+    dplyr::mutate(text_size = 100 / (length(unique(last_signal$ID_Spot)) * length(unique(ID_Wdh)))) |>
+    dplyr::ungroup() |>
     dplyr::left_join(stbls$Tab_Messposition) |>
     dplyr::group_by(Parameter) |>
     dplyr::mutate(Messposition = ifelse(is.na(Messposition), 0, Messposition)) |>
@@ -104,12 +108,13 @@ plot_last_value <- function(last_signal, stbls){
                                      tooltip = paste(stringr::str_trim(Parameter), "\n",
                                                      signif(Messwert,3), stringr::str_trim(Einheit), "\n",
                                                       Datum)))+
-    ggplot2::geom_text(color = "white")+
+    ggplot2::geom_text(color = "white", ggplot2::aes(size = text_size))+
     ggh4x::facet_grid2(Para~Spot, scales = "free", independent = "all")+
+    ggplot2::scale_size_identity()+
     ggplot2::theme_minimal()+
     ggplot2::theme(text = ggplot2::element_text(size = 24),
                    legend.position = "top",
                    strip.text.y = ggplot2::element_text(angle = 0))) |>
-    ggiraph::girafe(code = NULL, width_svg = 18, height_svg = 18, pointsize = 20)
+    ggiraph::girafe(code = NULL, width_svg = 24, height_svg = 18, pointsize = 20)
 
 }
