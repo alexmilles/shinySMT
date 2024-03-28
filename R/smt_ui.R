@@ -90,14 +90,23 @@ ui <- fluidPage(
                            )
                            ),
                          tabPanel(
-                            title = "Gerätestatus (Tage seit letzter Übertragung)",
+                            title = "Schnellübersicht: Gerätestatus (Tage seit letzter Übertragung)",
                             checkboxInput("include_old",
                                           label = "Signale älter als 14 Tage anzeigen (langsamer)?",
                                           value = TRUE),
                             shinycssloaders::withSpinner(
                               plotOutput(outputId = "health_plot", height = "1200px")
                               )
-                            )
+                            )#,
+                         # tabPanel(
+                         #   title = "Schnellübersicht: Aktuellste Messwerte",
+                         #   checkboxInput("include_old",
+                         #                 label = "Signale älter als 14 Tage anzeigen (langsamer)?",
+                         #                 value = TRUE),
+                         #   shinycssloaders::withSpinner(
+                         #   ggiraph::girafeOutput(outputId = "last_value_plot", height = "1200px")
+                         #   )
+                         # )
                          ),
         downloadButton(
           outputId = "download_local",

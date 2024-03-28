@@ -1,6 +1,6 @@
 
 #' @title Connects to database via data.frame
-#' Wrapper for frwfutils::db_connect
+#' Wrapper for db_connect
 #'
 #' @param login_credentials data.frame, contains login information
 connect <- function(login_credentials){
@@ -13,7 +13,7 @@ connect <- function(login_credentials){
 }
 
 #' @title Checks whether login information is valid
-#' Wrapper for frwfutils::dbCanConnect
+#' Wrapper for dbCanConnect
 #'
 #' @param login_credentials data.frame, contains login information
 canConnect <- function(login_credentials){
@@ -81,8 +81,8 @@ download_MW_info <- function(Stat, Spot = -999, start_date = Sys.time() - 7 * 86
   mw_info <-
     dplyr::tbl(con, "Tab_MW") |>
     dplyr::filter(ID_Stat == Stat) |>
-    dplyr::filter(Datum > dbplyr::sql_escape_datetime(con, start_date)) |>
-    dplyr::filter(Datum < dbplyr::sql_escape_datetime(con, end_date)) |>
+    dplyr::filter(Datum > start_date) |>
+    dplyr::filter(Datum < end_date) |>
     dplyr::select(ID_Stat, ID_Spot, ID_Para, ID_Messposition, ID_Wdh) |>
     dplyr::distinct() |>
     dplyr::collect()
@@ -122,9 +122,9 @@ download_MW <- function(Stat,
 
   mw <-
     dplyr::tbl(con, "Tab_MW") |>
+    dplyr::filter(Datum > start_date) |>
+    dplyr::filter(Datum <  end_date) |>
     dplyr::filter(ID_Stat == Stat) |>
-    dplyr::filter(Datum > dbplyr::sql_escape_datetime(con, start_date)) |>
-    dplyr::filter(Datum < dbplyr::sql_escape_datetime(con, end_date)) |>
     dplyr::filter(ID_Spot %in% Spot | -999 %in% Messposition) |>
     dplyr::filter(ID_Quali %in% Quali | -999 %in% Quali) |>
     dplyr::filter(ID_Para == Para| Para == -999) |>
@@ -200,14 +200,14 @@ download_last_signal <- function(Stat,
 
   on.exit(DBI::dbDisconnect(con))
 
-
-  last_signal <-
+    last_signal <-
     dplyr::tbl(con, "Tab_MW") |>
     dplyr::filter(Datum > start_date) |>
     dplyr::filter(ID_Stat == Stat) |>
     dplyr::group_by(ID_Para, ID_Spot, ID_Messposition, ID_Wdh) |>
-    dplyr::summarise(Datum = max(Datum)) |>
-    dplyr::collect()
+    dplyr::filter(Datum == max(Datum)) |>
+    dplyr::collect() |>
+    dplyr::filter(seq(dplyr::n()) == 1)
 
   if(include_old){
     all_measurements <- dplyr::tbl(con, "Tab_MW") |>
